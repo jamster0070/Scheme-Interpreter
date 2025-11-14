@@ -83,7 +83,6 @@ int Evaluator::Eval(int root)
     {
         int first = m.getNode(root).rchild;
         int second = m.getNode(first).rchild;
-
         int firstRoot = m.getNode(first).lchild;
         int secondRoot = m.getNode(second).lchild;
 
@@ -97,7 +96,6 @@ int Evaluator::Eval(int root)
     {
         int first = m.getNode(root).rchild;
         int second = m.getNode(first).rchild;
-
         int firstRoot = m.getNode(first).lchild;
         int secondRoot = m.getNode(second).lchild;
 
@@ -111,7 +109,6 @@ int Evaluator::Eval(int root)
     {
         int first = m.getNode(root).rchild;
         int second = m.getNode(first).rchild;
-
         int firstRoot = m.getNode(first).lchild;
         int secondRoot = m.getNode(second).lchild;
 
@@ -125,7 +122,6 @@ int Evaluator::Eval(int root)
     {
         int first = m.getNode(root).rchild;
         int second = m.getNode(first).rchild;
-
         int firstRoot = m.getNode(first).lchild;
         int secondRoot = m.getNode(second).lchild;
 
@@ -151,7 +147,6 @@ int Evaluator::Eval(int root)
     else if(tokenIndex == ISNULL)
     {
         int argCons = m.getNode(root).rchild;
-
         if(argCons == 0) return TRUE_SYM;
 
         int argRoot = m.getNode(argCons).lchild; // where x is
@@ -184,7 +179,6 @@ int Evaluator::Eval(int root)
     {
         int first = m.getNode(root).rchild;
         int second = m.getNode(first).rchild;
-
         int firstRoot = m.getNode(first).lchild;
         int secondRoot = m.getNode(second).lchild;
 
@@ -221,7 +215,6 @@ int Evaluator::Eval(int root)
 
         // evaluate the last one (else)
         int lastCons = m.getNode(curr).rchild;
-
         int elseCons = m.getNode(lastCons).lchild;
         int elseRoot = m.getNode(elseCons).lchild; // should be the hash value of 'else'
         if(elseRoot != ELSE) throw std::runtime_error("[cond] last clause must be 'else'");
@@ -236,8 +229,8 @@ int Evaluator::Eval(int root)
     {
         int argCons = m.getNode(root).rchild;
         int argRoot = m.getNode(argCons).lchild;
-
         int listVal = Eval(argRoot);
+
         return m.getNode(listVal).lchild; // first element
     }
     // 12. (cdr x)
@@ -245,8 +238,8 @@ int Evaluator::Eval(int root)
     {
         int argCons = m.getNode(root).rchild;
         int argRoot = m.getNode(argCons).lchild;
-
         int listVal = Eval(argRoot);
+
         return m.getNode(listVal).rchild; // except the first element
     }
     // 13. (define ...)
@@ -292,6 +285,7 @@ int Evaluator::Eval(int root)
     else
     {
         int argRoot = m.getNode(root).rchild;
+
         return UserFunc(tokenIndex, argRoot); // tokenindex is function name
     }
 }
@@ -377,10 +371,10 @@ int Evaluator::UserFunc(int funcExp, int argRoot)
     int result = Eval(bodyRoot);
 
     // Restore original linkOfValue for all parameters(Pop until backupStack is empty)
+    while(!backupStack.IsEmpty())
     {
         Element backup = backupStack.Top();
         backupStack.Pop();
-
         Element& e = htab.getElem(-backup.hashValue);
         e.linkOfValue = backup.linkOfValue;
     }
@@ -391,15 +385,12 @@ int Evaluator::UserFunc(int funcExp, int argRoot)
 bool Evaluator::IsNumber(int value) const
 {
     if(value >= 0) return false; // node index or NIL : cannot be a number
-
     std::string s = htab.FindSymbol(value);
-
     if(s.empty()) return false;
 
     int i = 0;
     bool hasDigit = false;
     bool hasDot = false;
-    
     int l = s.size();
 
     // check unary operators(sign)
@@ -408,7 +399,6 @@ bool Evaluator::IsNumber(int value) const
         if(l == 1) return false; // only "+" or "-" is not a number
         i = 1;
     }
-
     // check the value
     for(; i < l; i++)
     {
@@ -423,7 +413,6 @@ bool Evaluator::IsNumber(int value) const
         }
         else {return false;} // no numbers
     }
-
     // at least one digit is required
     return hasDigit;
 }
@@ -435,7 +424,6 @@ double Evaluator::GetVal(int value) const
 
     int i = 0;
     bool negative = false;
-
     int l = s.size();
 
     if(!s.empty() && (s[0] == '+' || s[0] == '-'))
@@ -458,7 +446,6 @@ double Evaluator::GetVal(int value) const
     {
         i++;
         double decimal = 0.1;
-
         while(i < l && std::isdigit(s[i]))
         {
             result = result + (s[i] - '0') * decimal;
@@ -466,7 +453,6 @@ double Evaluator::GetVal(int value) const
             i++;
         }
     }
-
     if(negative) result = -result;
     return result;
 }
@@ -496,7 +482,6 @@ int Evaluator::MakeNumber(double value)
 
         // remove trailing '0'
         while(last > pos && s[last] == '0'){last--;}
-
         if(last == pos){last--;}
 
         s = s.substr(0, last + 1);

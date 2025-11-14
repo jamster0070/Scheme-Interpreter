@@ -14,7 +14,6 @@ class Tokenizer {
         std::string GetNextToken();
         // 2. PushBack() : GetNextToken() -> PushBack(), roll back to the position before GetNextToken()
         void PushBack();
-        // 3. 
 
     private:
         int curr;

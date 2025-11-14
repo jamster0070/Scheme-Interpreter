@@ -41,6 +41,13 @@ int main()
 
         // Read()
         int parseTreeRoot = parser.Read();
+        
+        int first = 0;
+        if(parseTreeRoot > 0)
+        {
+            first = memory.getNode(parseTreeRoot).lchild;
+        }
+        int defineHash = hashtable.GetHashValue("define");
 
         // // Print Output start
         // std::cout << "] Free list's root = " << memory.getFreeRoot() << std::endl;;
@@ -96,21 +103,18 @@ int main()
         // }
         // std::cout << std::endl;
 
-        // // Print()
-        // parser.Print(parseTreeRoot, true);
-        // std::cout << std::endl;
-
-        // // return parse tree to free list
-        // memory.returnTree(parseTreeRoot);
-
         // #### 3. Evaluation ####
         Evaluator evaluator(memory, hashtable);
         int result = evaluator.Eval(parseTreeRoot);
 
         // #### 4. PrintResult ####
-        std::cout << "[Result] ";
-        evaluator.PrintResult(result, true);
-        std:: cout << std::endl;
+        if(!(first == defineHash)) // firs is not "define"
+        {
+             std::cout << "[Result] ";
+            evaluator.PrintResult(result, true);
+            std:: cout << std::endl;       
+        } 
+        // don't print when (define...)
     }
     return 0;
 }
