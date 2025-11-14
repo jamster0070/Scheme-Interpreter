@@ -31,6 +31,11 @@ Evaluator::Evaluator(Memory& memory, HashTable& hashtable):m(memory), htab(hasht
     // HashTable::BuiltIn() calls HashInsert("#t") and HashInsert("#f");
     TRUE_SYM = htab.GetHashValue("#t");
     FALSE_SYM = htab.GetHashValue("#f");
+
+    // pseudocode에는 없지만 구현해 봤습니다
+    EQ = htab.GetHashValue("="); 
+    RG = htab.GetHashValue("<"); 
+    LG = htab.GetHashValue(">"); 
 }
 
 // 1. Eval() : reads the root of a parse tree and returns the result of evaluation
@@ -58,7 +63,12 @@ int Evaluator::Eval(int root)
         }
         else // link == 0: can be undefined variable or number/#t/#f
         {
-            if(IsNumber(root)) {return root;} // number
+            if(IsNumber(root)) // number
+            {
+                double v = GetVal(root); // +4 -> 4
+                int temp = MakeNumber(v);
+                return temp;
+            } 
             else if(root == TRUE_SYM || root == FALSE_SYM) {return root;} // #t or #f
             else {throw std::runtime_error("Unbound variable: " + elem.symbol);} // undefined variable
         }
@@ -136,7 +146,7 @@ int Evaluator::Eval(int root)
         if(IsNumber(val)) return TRUE_SYM;
         else return FALSE_SYM;
     }
-    // symbol? 은 구현에서 제외
+    // symbol? 은 구현에서 제외하였습니다
     // 7. (null? x)
     else if(tokenIndex == ISNULL)
     {
@@ -150,7 +160,26 @@ int Evaluator::Eval(int root)
         if(val == 0) return TRUE_SYM;
         else return FALSE_SYM;
     }
-    // 8. (cons a b)
+    // 8. (= < >) 추가 구현
+    else if(tokenIndex == EQ || tokenIndex == LG || tokenIndex == RG)
+    {
+        int cons = m.getNode(root).rchild;
+
+        int firstRoot = m.getNode(cons).lchild;
+        int secondRoot = m.getNode(m.getNode(cons).rchild).lchild;
+
+        double v1 = GetVal(Eval(firstRoot));
+        double v2 = GetVal(Eval(secondRoot));
+
+        bool res = false;
+        if(tokenIndex == EQ) {res = (v1 == v2);}
+        else if(tokenIndex == LG) {res = (v1 > v2);}
+        else {res = (v1 < v2);} // RG
+
+        if(res) return TRUE_SYM;
+        else return FALSE_SYM;
+    }
+    // 9. (cons a b)
     else if(tokenIndex == CONS)
     {
         int first = m.getNode(root).rchild;
@@ -169,7 +198,7 @@ int Evaluator::Eval(int root)
 
         return newMemory;
     }
-    // 9. (cond ((C1) (E1)) ... ((Cn) (En)) (else (Eelse)))
+    // 10. (cond ((C1) (E1)) ... ((Cn) (En)) (else (Eelse)))
     else if(tokenIndex == COND)
     {
         int curr = root; // points to the node whose rchild chain tracking
@@ -202,7 +231,7 @@ int Evaluator::Eval(int root)
 
         return Eval(elseExprRoot);
     }
-    // 10. (car x)
+    // 11. (car x)
     else if(tokenIndex == CAR)
     {
         int argCons = m.getNode(root).rchild;
@@ -211,7 +240,7 @@ int Evaluator::Eval(int root)
         int listVal = Eval(argRoot);
         return m.getNode(listVal).lchild; // first element
     }
-    // 11. (cdr x)
+    // 12. (cdr x)
     else if(tokenIndex == CDR)
     {
         int argCons = m.getNode(root).rchild;
@@ -220,7 +249,7 @@ int Evaluator::Eval(int root)
         int listVal = Eval(argRoot);
         return m.getNode(listVal).rchild; // except the first element
     }
-    // 12. (define ...)
+    // 13. (define ...)
     else if(tokenIndex == DEFINE)
     {
         // i) user defined function (define square (lambda(x) (* x x)))
@@ -251,7 +280,7 @@ int Evaluator::Eval(int root)
 
         return nameHash;
     }
-    // 13. (quote x)
+    // 14. (quote x)
     else if(tokenIndex == QUOTE)
     {
         int argCons = m.getNode(root).rchild;
@@ -259,7 +288,7 @@ int Evaluator::Eval(int root)
 
         return quoteRoot;
     }
-    // 14. otherwise: user defined function call ex) (square 6) 
+    // 15. otherwise: user defined function call ex) (square 6) 
     else
     {
         int argRoot = m.getNode(root).rchild;

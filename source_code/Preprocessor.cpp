@@ -63,7 +63,7 @@ void preprocess(Tokenizer &t, std::string& newCommand)
             }
         }
         // 2. token is "'""
-        else if(tok == "'")
+        else if(tok == "'") // ex) '(1 2 3)
         {
             concatenate(newCommand, "(quote");
             int num_LPAREN = 0;
@@ -76,6 +76,12 @@ void preprocess(Tokenizer &t, std::string& newCommand)
                 else if(tok == ")") num_LPAREN--;
 
             } while(num_LPAREN > 0);
+            concatenate(newCommand, ")");
+        }
+        else if(tok.size() > 1 && tok[0] == '\'') // ex) 'error
+        {
+            concatenate(newCommand, "(quote");
+            concatenate(newCommand, tok.substr(1));
             concatenate(newCommand, ")");
         }
         else 

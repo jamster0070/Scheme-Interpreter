@@ -41,6 +41,11 @@ class Evaluator{
         int TRUE_SYM; // "#t"
         int FALSE_SYM; // "#f"
 
+        // pseudocode에는 없지만 구현해 봤습니다
+        int EQ; // "="
+        int RG; // "<"
+        int LG; // ">"
+
         // 3. UserFunc() : helper function for calling user defined functions 
         // restoring the original value(use ElemStack)
         // funcExp : name(symbol) of the function

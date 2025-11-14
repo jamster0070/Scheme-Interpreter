@@ -76,7 +76,9 @@ TESTCASES
 [TEST1 6]
 (cond ((number? 3) 'num) (else 'other))
 (cond ((null? '(1 2)) 'empty) (else 'not-empty))
-(cond ((null? 1) 'yes) ((number? 1) 'num) (else 'none))
+
+(define x 2)
+(cond ((null? x) 'yes) ((number? x) 'num) (else 'none))
 
 [ANS]
 num
@@ -149,30 +151,6 @@ r
 #t
 
 
-
-
-
-
-
-[DEBUG]
-> +4.0
-
-[Preprocessed] +4.0
-[Result] +4.0
-
-> (cond ((number? 3) 'num) (else 'other))
-
-[Preprocessed] (cond ((number? 3) 'num) (else 'other))
-[Result] 'num
-> (cond ((null? '(1 2)) 'empty) (else 'not-empty))
-
-[Preprocessed] (cond ((null? (quote (1 2))) 'empty) (else 'not-empty))
-[Result] 'not-empty
-> (cond ((null? 1) 'yes) ((number? 1) 'num) (else 'none))
-
-[Preprocessed] (cond ((null? 1) 'yes) ((number? 1) 'num) (else 'none))
-[Result] 'num
-quote가 붙어서 나옴(원래는 안붙어서 나와야 하는거 같은데 이건 preprocessing 문제일듯)
 
 
 
