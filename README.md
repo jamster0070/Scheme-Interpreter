@@ -19,5 +19,6 @@ Target: arm64-apple-darwin24.6.0
 To compile the project, run the following command from within the `source_code` directory:
 
 ```bash
-g++ -std=c++20 -o scheme_interpreter main.cpp Tokenizer.cpp Parser.cpp Memory.cpp HashTable.cpp
+g++ -std=c++20 -o scheme_interpreter main.cpp Tokenizer.cpp Parser.cpp Memory.cpp HashTable.cpp Preprocessor.cpp ElemStack.cpp Evaluator.cpp
+
 
