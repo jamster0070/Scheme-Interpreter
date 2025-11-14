@@ -50,7 +50,6 @@ void ElemStack::Push(const Element& x)
 void ElemStack::Pop()
 {
     if(IsEmpty()) throw std::runtime_error("[Pop] Stack is empty. Cannot delete");
-    S[top].~Element();
     top--;
 }
 

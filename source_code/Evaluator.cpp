@@ -1,4 +1,5 @@
 #include "Evaluator.h"
+#include "ElemStack.h"
 
 #include <iostream>
 #include <cctype> // for isdigit
@@ -246,7 +247,7 @@ int Evaluator::Eval(int root)
     else
     {
         int argRoot = m.getNode(root).rchild;
-        return Helper(tokenIndex, argRoot); // tokenindex is function name
+        return UserFunc(tokenIndex, argRoot); // tokenindex is function name
     }
 }
 
@@ -378,11 +379,11 @@ int Evaluator::MakeNumber(double value)
     return h;
 }
 
-// 6. Helper() : helper function for calling user defined functions 
-// restoring the original value
+// 6. UserFunc() : helper function for calling user defined functions 
+// restoring the original value(use ElemStack)
 // funcExp : hash value of name(symbol) of the function
 // argRoot : node index that points to the function argument
-int Evaluator::Helper(int funcExp, int argRoot)
+int Evaluator::UserFunc(int funcExp, int argRoot)
 {
     Element& funcElem = htab.getElem(-funcExp);
     int lambdaRoot = funcElem.linkOfValue; 
@@ -394,12 +395,9 @@ int Evaluator::Helper(int funcExp, int argRoot)
     int bodyCons = m.getNode(cons).rchild;
     int bodyRoot = m.getNode(bodyCons).lchild;
 
-    int capacity = m.getCapacity();
-    int* backupIndex = new int[capacity]; // parameter symbol table indices
-    int* backupLink = new int[capacity]; // original linkOfValue
-    int paramCount = 0; // number of parameters
+    ElemStack backupStack(htab.getCapacity());
 
-    while(paramRoot !=0 && argRoot != 0 && paramCount < capacity)
+    while(paramRoot !=0 && argRoot != 0)
     {
         // current paramenter symbol hash
         int paramHash = m.getNode(paramRoot).lchild;
@@ -410,11 +408,11 @@ int Evaluator::Helper(int funcExp, int argRoot)
 
         Element& paramElem = htab.getElem(-paramHash);
 
-        backupIndex[paramCount] = -paramHash;
-        backupLink[paramCount] = paramElem.linkOfValue;
+        // back up the copy of the current Element into the stack
+        Element backup = paramElem;
+        backupStack.Push(backup);
 
         paramElem.linkOfValue = argVal; // temporary update of link
-        paramCount++;
 
         // move to next parameter, argument
         paramRoot = m.getNode(paramRoot).rchild;
@@ -423,16 +421,15 @@ int Evaluator::Helper(int funcExp, int argRoot)
 
     int result = Eval(bodyRoot);
 
-    // Restore original linkOfValue for all parameters(NOT by stack but by array)
-    for(int i = 0; i < paramCount; i++)
+    // Restore original linkOfValue for all parameters(Pop until backupStack is empty)
     {
-        Element& e = htab.getElem(backupIndex[i]);
-        e.linkOfValue = backupLink[i];
+        Element backup = backupStack.Top();
+        backupStack.Pop();
+
+        Element& e = htab.getElem(-backup.hashValue);
+        e.linkOfValue = backup.linkOfValue;
     }
-
-    delete[] backupIndex;
-    delete[] backupLink;
-
+    
     return result;
 }
 

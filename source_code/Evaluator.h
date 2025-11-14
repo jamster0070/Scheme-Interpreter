@@ -51,11 +51,11 @@ class Evaluator{
         // 5. MakeNumber() : change the calculation result(double) into a symbol and insert, then return its hash value
         int MakeNumber(double value);
 
-        // 6. Helper() : helper function for calling user defined functions 
-        // restoring the original value
+        // 6. UserFunc() : helper function for calling user defined functions 
+        // restoring the original value(use ElemStack)
         // funcExp : name(symbol) of the function
         // argRoot : node index that points to the function argument
-        int Helper(int funcExp, int argRoot);
+        int UserFunc(int funcExp, int argRoot);
 
         // 7. PrintList() : used in public memeber function PrintResult() to recursively print a list
         void PrintList(int root, bool startList);
