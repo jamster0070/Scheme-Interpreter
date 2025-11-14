@@ -31,8 +31,6 @@ int main()
         Tokenizer tmp(cmd);
         std::string newCmd;
         preprocess(tmp, newCmd);
-
-        std::cout << "[Preprocessed] " << newCmd << std::endl;
     
         // #### 2. Read ####
         // create objects
@@ -49,60 +47,6 @@ int main()
         }
         int defineHash = hashtable.GetHashValue("define");
 
-        // // Print Output start
-        // std::cout << "] Free list's root = " << memory.getFreeRoot() << std::endl;;
-        // std::cout << "Parse tree's root = " << parseTreeRoot << std::endl;
-        // std::cout << std::endl;
-
-        // // 1. Node Array
-        // std::cout << "Node array = \n";
-        // // Header
-        // std::cout << "Node Id\t\t| Left\t\t| Right\n";
-        // std::cout << "----------------#---------------#---------------\n";
-
-        // for(int i = 0; i  < memory.getCapacity(); i++)
-        // {
-        //     const Node& node = memory.getNode(i);
-        //     std::cout << i << "\t\t| " << node.lchild << "\t\t| " << node.rchild << std::endl;
-        // }
-        // std::cout << std::endl;
-
-        // // 2. Hash Table
-        // std::cout << "Hash table = \n";
-        // // Header
-        // std::cout << "Hash Value\t| Symbol\t| Link\n";
-        // std::cout << "----------------#---------------#---------------\n";
-
-        // for(int i = 0; i < hashtable.getCapacity(); i++)
-        // {
-        //     const Element& elem = hashtable.getElem(i);
-        //     if(elem.symbol != "" || i == 0) // non-empty elements
-        //     {
-        //         std::cout << elem.hashValue << "\t\t| ";
-
-        //         if(i == 0)
-        //         {
-        //             std::cout << "()";
-        //             for(int k = 0; k < 12; k++) 
-        //             {
-        //                 std::cout << " ";
-        //             }
-        //         }
-        //         else
-        //         {
-        //             std::cout << elem.symbol;
-
-        //             int padd = 14 - elem.symbol.length();
-        //             for(int k = 0; k < padd; k++)
-        //             {
-        //                 std::cout << " ";
-        //             }
-        //         }
-        //         std::cout << "| " << elem.linkOfValue << std::endl;
-        //     }    
-        // }
-        // std::cout << std::endl;
-
         // #### 3. Evaluation ####
         Evaluator evaluator(memory, hashtable);
         int result = evaluator.Eval(parseTreeRoot);
@@ -110,11 +54,61 @@ int main()
         // #### 4. PrintResult ####
         if(!(first == defineHash)) // firs is not "define"
         {
-             std::cout << "[Result] ";
             evaluator.PrintResult(result, true);
             std:: cout << std::endl;       
         } 
         // don't print when (define...)
     }
+
+    // Print Tables
+    // 1. Node Array
+    std::cout << "Node array = \n";
+    // Header
+    std::cout << "Node Id\t\t| Left\t\t| Right\n";
+    std::cout << "----------------#---------------#---------------\n";
+
+    for(int i = 0; i  < memory.getCapacity(); i++)
+    {
+        const Node& node = memory.getNode(i);
+        std::cout << i << "\t\t| " << node.lchild << "\t\t| " << node.rchild << std::endl;
+    }
+    std::cout << std::endl;
+
+    // 2. Hash Table
+    std::cout << "Hash table = \n";
+    // Header
+    std::cout << "Hash Value\t| Symbol\t| Link\n";
+    std::cout << "----------------#---------------#---------------\n";
+
+    for(int i = 0; i < hashtable.getCapacity(); i++)
+    {
+        const Element& elem = hashtable.getElem(i);
+        if(elem.symbol != "" || i == 0) // non-empty elements
+        {
+            std::cout << elem.hashValue << "\t\t| ";
+
+            if(i == 0)
+            {
+                std::cout << "()";
+                for(int k = 0; k < 12; k++) 
+                {
+                    std::cout << " ";
+                }
+            }
+            else
+            {
+                std::cout << elem.symbol;
+
+                int padd = 14 - elem.symbol.length();
+                for(int k = 0; k < padd; k++)
+                {
+                    std::cout << " ";
+                }
+            }
+            std::cout << "| " << elem.linkOfValue << std::endl;
+        }    
+    }
+    std::cout << std::endl;
+
     return 0;
 }

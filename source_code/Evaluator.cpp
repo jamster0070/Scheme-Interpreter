@@ -361,8 +361,15 @@ int Evaluator::UserFunc(int funcExp, int argRoot)
         Element backup = paramElem;
         backupStack.Push(backup);
 
-        paramElem.linkOfValue = argVal; // temporary update of link
-
+        if(argVal == 0) // #### special marker for NIL
+        {
+            int markNIL = -htab.getCapacity();
+            paramElem.linkOfValue = markNIL;
+        }
+        else
+        {
+            paramElem.linkOfValue = argVal; // temporary update of link
+        }
         // move to next parameter, argument
         paramRoot = m.getNode(paramRoot).rchild;
         argRoot = m.getNode(argRoot).rchild;
