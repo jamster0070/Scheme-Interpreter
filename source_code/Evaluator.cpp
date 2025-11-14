@@ -27,6 +27,8 @@ Evaluator::Evaluator(Memory& memory, HashTable& hashtable):m(memory), htab(hasht
     LAMBDA = htab.GetHashValue("lambda");
     ELSE = htab.GetHashValue("else");
 
+    // #t and #f doesn't usually appear in the command
+    // HashTable::BuiltIn() calls HashInsert("#t") and HashInsert("#f");
     TRUE_SYM = htab.GetHashValue("#t");
     FALSE_SYM = htab.GetHashValue("#f");
 }
@@ -36,24 +38,33 @@ Evaluator::Evaluator(Memory& memory, HashTable& hashtable):m(memory), htab(hasht
 // 2) return positive int : node index(result is a list)
 int Evaluator::Eval(int root)
 {
-    // end condition
     // root is 0 : NIL
     if(root == 0) return 0;
+
     // root < 0 : hash value (symbol/number/#t/#f)
     if(root < 0)
     {
         Element& elem = htab.getElem(-root);
+        int link = elem.linkOfValue;
+        int markNIL = -htab.getCapacity();
 
-        if(elem.linkOfValue != 0) // there is a link to this value ex) (define x 3)
+        if(link == markNIL) // ex) (define y '())
         {
-            return elem.linkOfValue;
+            return 0; // (null? y) -> true
         }
-        else // no link of value
+        else if(link != 0) // there is a link to this value ex) (define x 3)
         {
-            return root;
+            return link;
+        }
+        else // link == 0: can be undefined variable or number/#t/#f
+        {
+            if(IsNumber(root)) {return root;} // number
+            else if(root == TRUE_SYM || root == FALSE_SYM) {return root;} // #t or #f
+            else {throw std::runtime_error("Unbound variable: " + elem.symbol);} // undefined variable
         }
     }
 
+    // root > 0
     // 1. get the operator token in the first cell
     int tokenIndex = m.getNode(root).lchild;
 
@@ -231,7 +242,12 @@ int Evaluator::Eval(int root)
         }
 
         Element& nameElem = htab.getElem(-nameHash);
-        nameElem.linkOfValue = storedVal;
+
+        // #### special marker for NIL ex) (define y '()) -> should have a link that is NOT 0
+        int markNIL = -htab.getCapacity();
+
+        if(storedVal == 0) nameElem.linkOfValue = markNIL;
+        else nameElem.linkOfValue = storedVal; 
 
         return nameHash;
     }

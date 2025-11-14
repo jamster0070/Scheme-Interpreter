@@ -130,19 +130,6 @@ void HashTable::BuiltIn()
     // built in symbols
     HashInsert("(");
     HashInsert(")");
-
-    
-    // HashInsert("+");
-    // HashInsert("-");
-    // HashInsert("*");
-    // HashInsert("/");
-    // HashInsert("=");
-    // HashInsert("<");
-    // HashInsert(">");
-    // HashInsert("car");
-    // HashInsert("cdr");
-    // HashInsert("cons");
-    // HashInsert("null?");
-    // HashInsert("display");
-    // HashInsert("error");
+    HashInsert("#t");
+    HashInsert("#f");
 }

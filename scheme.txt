@@ -1,0 +1,187 @@
+TESTCASES
+
+------------------------------------------------------------------------
+[TEST1 1]
+3
+-2
+3.5
++4.0
+
+[ANS]
+3
+-2
+3.5
+4
+------------------------------------------------------------------------
+[TEST1 2]
+(number? 3)
+(number? -2.5)
+(number? '())
+(null? '())
+(null? 3)
+
+[ANS]
+#t
+#t
+#f
+#t
+#f
+------------------------------------------------------------------------
+[TEST1 3]
+'()
+'(1 2 3)
+'(a b c)
+'(1 (2 3) ())
+
+[ANS]
+()
+(1 2 3)
+(a b c)
+(1 (2 3 ()))
+------------------------------------------------------------------------
+[TEST1 4]
+(+ 1 2)
+(+ 1.5 2.25)
+(- 5 2)
+(- 2 5)
+(* 2 3.5)
+(/ 7 2)
+(+ (* 2 3) (- 10 4))   ; 중첩 연산
+
+[ANS]
+3
+3.75
+3
+-3
+7
+3.5
+12
+------------------------------------------------------------------------
+[TEST1 5]
+(cons 1 '())
+(cons 1 '(2 3))
+(car '(1 2 3))
+(cdr '(1 2 3))
+(car (cons 1 '(2 3)))
+(cdr (cons 1 '(2 3)))
+
+[ANS]
+(1)
+(1 2 3)
+1
+(2 3)
+1
+(2 3)
+------------------------------------------------------------------------
+[TEST1 6]
+(cond ((number? 3) 'num) (else 'other))
+(cond ((null? '(1 2)) 'empty) (else 'not-empty))
+(cond ((null? 1) 'yes) ((number? 1) 'num) (else 'none))
+
+[ANS]
+num
+not-empty
+num
+------------------------------------------------------------------------
+[TEST1 7]
+(define x 3)
+x
+(number? x)
+(+ x 4)
+(/ x 4)
+
+[ANS]
+x        ; (혹은 3을 출력하게 하고 싶으면 define의 return을 바꿔야 함)
+3
+#t
+7
+0.75
+------------------------------------------------------------------------
+[TEST1 8]
+(define y '())
+(null? y)
+(number? y)
+
+[ANS]
+y      ; (마찬가지로 define의 리턴값에 따라)
+#t
+#f
+------------------------------------------------------------------------
+[TEST1 9]
+(define (square x) (* x x))
+(square 5)
+(square x)      ; 앞에서 x를 3으로 define 했다고 가정
+
+[ANS]
+square   ; (역시 define 리턴은 심볼)
+25
+9
+------------------------------------------------------------------------
+[TEST1 10]
+(define (append L R)
+  (cond ((null? L) R)
+        (else (cons (car L) (append (cdr L) R)))))
+
+
+(define (append L R) (if (null? L) R (cons (car L) (append (cdr L) R))))
+
+(append '(1 2) '(3 4))
+(define xs '(10 20))
+(append xs '(30 40))
+
+
+[ANS]
+append          ; define의 리턴
+(1 2 3 4)
+xs
+(10 20 30 40)
+------------------------------------------------------------------------
+[TEST1 11]
+(define r 2.5)
+(* r r)
+(+ r 1.25)
+(number? r)
+
+[ANS]
+r
+6.25
+3.75
+#t
+
+
+
+
+
+
+
+[DEBUG]
+> +4.0
+
+[Preprocessed] +4.0
+[Result] +4.0
+
+> (cond ((number? 3) 'num) (else 'other))
+
+[Preprocessed] (cond ((number? 3) 'num) (else 'other))
+[Result] 'num
+> (cond ((null? '(1 2)) 'empty) (else 'not-empty))
+
+[Preprocessed] (cond ((null? (quote (1 2))) 'empty) (else 'not-empty))
+[Result] 'not-empty
+> (cond ((null? 1) 'yes) ((number? 1) 'num) (else 'none))
+
+[Preprocessed] (cond ((null? 1) 'yes) ((number? 1) 'num) (else 'none))
+[Result] 'num
+quote가 붙어서 나옴(원래는 안붙어서 나와야 하는거 같은데 이건 preprocessing 문제일듯)
+
+
+
+
+
+
+
+
+
+
+
+
