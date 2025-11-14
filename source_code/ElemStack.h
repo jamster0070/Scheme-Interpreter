@@ -1,21 +1,22 @@
-#ifndef STACK_HPP
-#define STACK_HPP
+#ifndef ELEMSTACK_HPP
+#define ELEMSTACK_HPP
 
 #include "HashTable.h"
 
 // "Element" data type of HashTable is used in the stack
-class Stack{
+class ElemStack{
     public:
-        Stack(int stackCapacity);
-        ~Stack();
+        ElemStack(int stackCapacity);
+        ~ElemStack();
 
         bool IsEmpty() const;
+        void ChangeSize(int newCapacity);
         void Push(const Element& x);
         void Pop();
         Element& Top() const;
 
     private:
-        Element* stack;
+        Element* S;
         int top;
         int capacity;
 };
