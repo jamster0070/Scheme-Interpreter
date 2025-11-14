@@ -252,134 +252,44 @@ int Evaluator::Eval(int root)
 }
 
 // 2. PrintResult() : prints the result of evaluation
-void PrintResult(int result, bool startlist)
+void Evaluator::PrintResult(int result, bool startlist)
 {
-
-}
-
- // 3. IsNumber() : check if the result(hash value) is a number 
-bool Evaluator::IsNumber(int value) const
-{
-    if(value >= 0) return false; // node index or NIL : cannot be a number
-
-    std::string s = htab.FindSymbol(value);
-
-    if(s.empty()) return false;
-
-    int i = 0;
-    bool hasDigit = false;
-    bool hasDot = false;
-    
-    int l = s.size();
-
-    // check unary operators(sign)
-    if(s[0] == '+' || s[0] == '-')
+    // 1. NIL (empty list)
+    if(result == 0)
     {
-        if(l == 1) return false; // only "+" or "-" is not a number
-        i = 1;
+        std::cout << "()";
+        return;
     }
-
-    // check the value
-    for(; i < l; i++)
+    // 2. Atom (symbol / number / #t / #f)
+    else if(result < 0) 
     {
-        if(std::isdigit(s[i]))
+        std::cout << htab.FindSymbol(result);
+        return;
+    }
+    // 3. List: cons cell
+    else // result > 0
+    {
+        if(startlist) std::cout << "(";
+
+        // print first element
+        int car = m.getNode(result).lchild;
+        PrintResult(car, true);
+
+        // print leftover
+        int cdr = m.getNode(result).rchild;
+        if(cdr != 0)
         {
-            hasDigit = true;
+            std::cout << " ";
+            PrintResult(cdr, false);
         }
-        else if (s[i] == '.' && !hasDot)
+        else // end of list
         {
-            // allow one decimal point(only one!)
-            hasDot = true;
-        }
-        else {return false;} // no numbers
-    }
-
-    // at least one digit is required
-    return hasDigit;
-}
-
-// 4. GetVal() : get the result(hash value) and return the symbol(number) in double
-double Evaluator::GetVal(int value) const
-{
-    std::string s = htab.FindSymbol(value);
-
-    int i = 0;
-    bool negative = false;
-
-    int l = s.size();
-
-    if(!s.empty() && (s[0] == '+' || s[0] == '-'))
-    {
-        negative = (s[0] == '-');
-        i = 1;
-    }
-
-    double result = 0.0;
-
-    // integer part
-    while(i < l && std::isdigit(s[i]))
-    {
-        result = result * 10.0 + (s[i] - '0');
-        i++;
-    }
-
-    // decimal part
-    if(i < l && s[i] == '.')
-    {
-        i++;
-        double decimal = 0.1;
-
-        while(i < l && std::isdigit(s[i]))
-        {
-            result = result + (s[i] - '0') * decimal;
-            decimal *= 0.1;
-            i++;
+            std::cout << ")";
         }
     }
-
-    if(negative) result = -result;
-    return result;
 }
 
-// 5. MakeNumber() : change the calculation result(double) into a symbol and insert, then return its hash value
-int Evaluator::MakeNumber(double value)
-{
-    // convert double to string ex) "3.50000"
-    std::string s = std::to_string(value);
-
-    // remove excess zeros after decimal
-    int l = s.size();
-    int pos = -1; // position of the dot
-
-    for(int i = 0; i < l; i++)
-    {
-        if(s[i] == '.')
-        {
-            pos = i;
-            break;
-        }
-    }
-
-    if(pos != -1) // dot exists!
-    {
-        int last = l - 1;
-
-        // remove trailing '0'
-        while(last > pos && s[last] == '0'){last--;}
-
-        if(last == pos){last--;}
-
-        s = s.substr(0, last + 1);
-    }
-
-    // insert this string into the hash table and return the hash value
-    htab.HashInsert(s);
-    int h = htab.GetHashValue(s);
-
-    return h;
-}
-
-// 6. UserFunc() : helper function for calling user defined functions 
+// 3. UserFunc() : helper function for calling user defined functions 
 // restoring the original value(use ElemStack)
 // funcExp : hash value of name(symbol) of the function
 // argRoot : node index that points to the function argument
@@ -429,12 +339,128 @@ int Evaluator::UserFunc(int funcExp, int argRoot)
         Element& e = htab.getElem(-backup.hashValue);
         e.linkOfValue = backup.linkOfValue;
     }
-    
     return result;
 }
 
-// 7. PrintList() : used in public memeber function PrintResult() to recursively print a list
-void Evaluator::PrintList(int root, bool startList)
+ // 4. IsNumber() : check if the result(hash value) is a number 
+bool Evaluator::IsNumber(int value) const
 {
+    if(value >= 0) return false; // node index or NIL : cannot be a number
 
+    std::string s = htab.FindSymbol(value);
+
+    if(s.empty()) return false;
+
+    int i = 0;
+    bool hasDigit = false;
+    bool hasDot = false;
+    
+    int l = s.size();
+
+    // check unary operators(sign)
+    if(s[0] == '+' || s[0] == '-')
+    {
+        if(l == 1) return false; // only "+" or "-" is not a number
+        i = 1;
+    }
+
+    // check the value
+    for(; i < l; i++)
+    {
+        if(std::isdigit(s[i]))
+        {
+            hasDigit = true;
+        }
+        else if (s[i] == '.' && !hasDot)
+        {
+            // allow one decimal point(only one!)
+            hasDot = true;
+        }
+        else {return false;} // no numbers
+    }
+
+    // at least one digit is required
+    return hasDigit;
 }
+
+// 5. GetVal() : get the result(hash value) and return the symbol(number) in double
+double Evaluator::GetVal(int value) const
+{
+    std::string s = htab.FindSymbol(value);
+
+    int i = 0;
+    bool negative = false;
+
+    int l = s.size();
+
+    if(!s.empty() && (s[0] == '+' || s[0] == '-'))
+    {
+        negative = (s[0] == '-');
+        i = 1;
+    }
+
+    double result = 0.0;
+
+    // integer part
+    while(i < l && std::isdigit(s[i]))
+    {
+        result = result * 10.0 + (s[i] - '0');
+        i++;
+    }
+
+    // decimal part
+    if(i < l && s[i] == '.')
+    {
+        i++;
+        double decimal = 0.1;
+
+        while(i < l && std::isdigit(s[i]))
+        {
+            result = result + (s[i] - '0') * decimal;
+            decimal *= 0.1;
+            i++;
+        }
+    }
+
+    if(negative) result = -result;
+    return result;
+}
+
+// 6. MakeNumber() : change the calculation result(double) into a symbol and insert, then return its hash value
+int Evaluator::MakeNumber(double value)
+{
+    // convert double to string ex) "3.50000"
+    std::string s = std::to_string(value);
+
+    // remove excess zeros after decimal
+    int l = s.size();
+    int pos = -1; // position of the dot
+
+    for(int i = 0; i < l; i++)
+    {
+        if(s[i] == '.')
+        {
+            pos = i;
+            break;
+        }
+    }
+
+    if(pos != -1) // dot exists!
+    {
+        int last = l - 1;
+
+        // remove trailing '0'
+        while(last > pos && s[last] == '0'){last--;}
+
+        if(last == pos){last--;}
+
+        s = s.substr(0, last + 1);
+    }
+
+    // insert this string into the hash table and return the hash value
+    htab.HashInsert(s);
+    int h = htab.GetHashValue(s);
+
+    return h;
+}
+
