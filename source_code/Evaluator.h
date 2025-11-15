@@ -9,8 +9,6 @@ class Evaluator{
         Evaluator(Memory& memory, HashTable& hashtable);
 
         // 1. Eval() : reads the root of a parse tree and returns the result of evaluation
-        // 1) return negative int or 0 : hash value(result is a symbol, number, or #t, #f)
-        // 2) return positive int : node index(result is a list)
         int Eval(int root);
 
         // 2. PrintResult() : prints the result of evaluation

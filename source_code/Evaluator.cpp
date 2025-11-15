@@ -39,8 +39,6 @@ Evaluator::Evaluator(Memory& memory, HashTable& hashtable):m(memory), htab(hasht
 }
 
 // 1. Eval() : reads the root of a parse tree and returns the result of evaluation
-// 1) return negative int or 0 : hash value(result is a symbol, number, or #t, #f)
-// 2) return positive int : node index(result is a list)
 int Evaluator::Eval(int root)
 {
     // root is 0 : NIL
@@ -128,7 +126,7 @@ int Evaluator::Eval(int root)
         double v1 = GetVal(Eval(firstRoot));
         double v2 = GetVal(Eval(secondRoot));
 
-        // assume that b is not zero in every command
+        if(v2 == 0) throw std::runtime_error("Division by zero");
         return MakeNumber(v1 / v2);
     }
     // 6. (number? x)
@@ -142,7 +140,7 @@ int Evaluator::Eval(int root)
         if(IsNumber(val)) return TRUE_SYM;
         else return FALSE_SYM;
     }
-    // symbol? 은 구현에서 제외하였습니다
+    // symbol? NOT implemented
     // 7. (null? x)
     else if(tokenIndex == ISNULL)
     {

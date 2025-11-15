@@ -26,8 +26,7 @@ int main()
         std::getline(std::cin, cmd);
         if(cmd.empty()) {break;}
 
-        // #### 1. Preprocess ####
-
+        // #### 1. Preprocess #### 
         Tokenizer tmp(cmd);
         std::string newCmd;
         preprocess(tmp, newCmd);
