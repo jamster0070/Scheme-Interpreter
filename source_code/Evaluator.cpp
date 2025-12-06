@@ -326,6 +326,7 @@ void Evaluator::PrintResult(int result, bool startlist)
     }
 }
 
+// modified 12.04
 // 3. UserFunc() : helper function for calling user defined functions 
 // restoring the original value(use ElemStack)
 // funcExp : hash value of name(symbol) of the function
@@ -342,35 +343,55 @@ int Evaluator::UserFunc(int funcExp, int argRoot)
     int bodyCons = m.getNode(cons).rchild;
     int bodyRoot = m.getNode(bodyCons).lchild;
 
-    ElemStack backupStack(htab.getCapacity());
+    // #### modified 12.04 to solve variable name collision ####
+    int count = 0;
+    int tempArg = argRoot;
 
-    while(paramRoot !=0 && argRoot != 0)
+    while(tempArg != 0)
+    {
+        count++;
+        tempArg = m.getNode(tempArg).rchild;
+    }
+
+    int* argValues = new int[count];
+
+    tempArg = argRoot;
+    for(int i = 0; i < count; i++)
+    {
+        int argExprRoot = m.getNode(tempArg).lchild;
+        argValues[i] = Eval(argExprRoot); 
+        tempArg = m.getNode(tempArg).rchild;
+    }
+
+
+    ElemStack backupStack(htab.getCapacity());
+    int currParam = paramRoot;
+    int idx = 0;
+
+    while(currParam != 0 && idx < count)
     {
         // current paramenter symbol hash
-        int paramHash = m.getNode(paramRoot).lchild;
-
-        // current argument expression root
-        int argExprRoot = m.getNode(argRoot).lchild;
-        int argVal = Eval(argExprRoot); // can be hash or node index
-
+        int paramHash = m.getNode(currParam).lchild;
         Element& paramElem = htab.getElem(-paramHash);
 
         // back up the copy of the current Element into the stack
         Element backup = paramElem;
         backupStack.Push(backup);
 
-        if(argVal == 0) // #### special marker for NIL
+        int val = argValues[idx];
+
+        if(val == 0) // #### special marker for NIL
         {
             int markNIL = -htab.getCapacity();
             paramElem.linkOfValue = markNIL;
         }
         else
         {
-            paramElem.linkOfValue = argVal; // temporary update of link
+            paramElem.linkOfValue = val;
         }
-        // move to next parameter, argument
-        paramRoot = m.getNode(paramRoot).rchild;
-        argRoot = m.getNode(argRoot).rchild;
+        
+        currParam = m.getNode(currParam).rchild;
+        idx++;
     }
 
     int result = Eval(bodyRoot);
@@ -383,6 +404,9 @@ int Evaluator::UserFunc(int funcExp, int argRoot)
         Element& e = htab.getElem(-backup.hashValue);
         e.linkOfValue = backup.linkOfValue;
     }
+
+    delete[] argValues;
+
     return result;
 }
 
